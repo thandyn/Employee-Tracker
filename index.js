@@ -3,6 +3,7 @@ const mysql = require("mysql2");
 const inquirer = require("inquirer");
 require("console.table");
 
+// prompt navagation
 const mainPrompt = () => {
   inquirer
     .prompt([
@@ -50,7 +51,7 @@ const mainPrompt = () => {
       }
     });
 };
-
+// view departments in database
 const viewDepartments = () => {
   db.query("SELECT * FROM department", (err, department) => {
     if (err) {
@@ -60,7 +61,7 @@ const viewDepartments = () => {
     mainPrompt();
   });
 };
-
+// view roles in database
 const viewRoles = () => {
   db.query("SELECT * FROM role", (err, role) => {
     if (err) {
@@ -70,7 +71,7 @@ const viewRoles = () => {
     mainPrompt();
   });
 };
-
+// view employees in database
 const viewEmployees = () => {
   db.query("SELECT * FROM employee", (err, employee) => {
     if (err) {
@@ -80,7 +81,7 @@ const viewEmployees = () => {
     mainPrompt();
   });
 };
-
+// add a department to database
 const addDepartments = () => {
   inquirer
     .prompt([
@@ -102,7 +103,7 @@ const addDepartments = () => {
       mainPrompt();
     });
 };
-
+// add a role to database
 const addRoles = () => {
   inquirer
     .prompt([
@@ -133,7 +134,7 @@ const addRoles = () => {
       mainPrompt();
     });
 };
-
+//add employees to database
 const addEmployees = () => {
   inquirer
     .prompt([
@@ -159,6 +160,7 @@ const addEmployees = () => {
         choices: ["yes", "no"],
       },
     ])
+    // if the employee is a manager
     .then((res) => {
       if (res.manager === "yes") {
         delete res.manager;
@@ -168,6 +170,7 @@ const addEmployees = () => {
           }
         });
         mainPrompt();
+        // if the employee is not a manager, enter manager's ID to have employee under a manager
       } else if (res.manager === "no") {
         inquirer
           .prompt([
@@ -194,7 +197,7 @@ const addEmployees = () => {
       }
     });
 };
-
+// update current employee
 const updateEmployeeRoles = () => {
   inquirer
     .prompt([
@@ -235,7 +238,7 @@ const updateEmployeeRoles = () => {
       });
     });
 };
-
+// exit out of application
 const quit = () => {
   console.log("Goodbye!");
   process.exit();

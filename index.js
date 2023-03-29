@@ -1,10 +1,6 @@
-// const db = require("./db/connection");
+const db = require("./db/connection");
 const mysql = require("mysql2");
-const db = mysql.createConnection(
-  "mysql://root:Tl-iTe1i=7owO_AdowRat@localhost:3306/employees_db"
-);
 const inquirer = require("inquirer");
-const { Sequelize } = require("sequelize");
 require("console.table");
 
 const mainPrompt = () => {
@@ -46,41 +42,41 @@ const mainPrompt = () => {
         case "Add Employees.":
           addEmployees();
           break;
-        case "Update Employee Role":
+        case "Update Employee Role.":
           updateEmployeeRoles();
           break;
-        default:
+        case "Quit":
           quit();
       }
     });
 };
 
 const viewDepartments = () => {
-  db.query("SELECT * FROM departments", (err, departments) => {
+  db.query("SELECT * FROM department", (err, department) => {
     if (err) {
       console.log(err);
     }
-    console.table(departments);
+    console.table(department);
     mainPrompt();
   });
 };
 
 const viewRoles = () => {
-  db.query("SELECT * FROM roles", (err, roles) => {
+  db.query("SELECT * FROM role", (err, role) => {
     if (err) {
       console.log(err);
     }
-    console.table(roles);
+    console.table(role);
     mainPrompt();
   });
 };
 
 const viewEmployees = () => {
-  db.query("SELECT * FROM employees", (err, employees) => {
+  db.query("SELECT * FROM employee", (err, employee) => {
     if (err) {
       console.log(err);
     }
-    console.table(employees);
+    console.table(employee);
     mainPrompt();
   });
 };
@@ -129,7 +125,7 @@ const addRoles = () => {
     .then((res) => {
       console.log(res);
 
-      db.query("INSERT INTO roles SET ?", role, (err) => {
+      db.query("INSERT INTO role SET ?", res, (err) => {
         if (err) {
           console.log(err);
         }
@@ -166,7 +162,7 @@ const addEmployees = () => {
     .then((res) => {
       if (res.manager === "yes") {
         delete res.manager;
-        db.query("INSERT INTO employees SET ?", res, (err) => {
+        db.query("INSERT INTO employee SET ?", res, (err) => {
           if (err) {
             console.log(err);
           }
@@ -184,11 +180,11 @@ const addEmployees = () => {
           .then((subordinate) => {
             delete res.manager;
             let newEmployee = {
-              ...employee,
+              ...res,
               manager_id: subordinate.manager_id,
             };
 
-            db.query("INSERT INTO employees SET ?", newEmployee, (err) => {
+            db.query("INSERT INTO employee SET ?", newEmployee, (err) => {
               if (err) {
                 console.log(err);
               }
@@ -231,10 +227,12 @@ const updateEmployeeRoles = () => {
       },
     ])
     .then((res) => {
-      db.query(`UPDATE employees SET ? WHERE id =${res.id}`, res, (err) => {
-        console.log(err);
+      db.query(`UPDATE employee SET ? WHERE id =${res.id}`, res, (err) => {
+        if (err) {
+          console.log(err); // log any errors
+        }
+        mainPrompt();
       });
-      mainPrompt();
     });
 };
 

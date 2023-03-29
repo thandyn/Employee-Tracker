@@ -1,6 +1,10 @@
-const db = require("./db");
+// const db = require("./db/connection");
+const mysql = require("mysql2");
+const db = mysql.createConnection(
+  "mysql://root:Tl-iTe1i=7owO_AdowRat@localhost:3306/employees_db"
+);
 const inquirer = require("inquirer");
-const mysql2 = require("mysql2");
+const { Sequelize } = require("sequelize");
 require("console.table");
 
 const mainPrompt = () => {
@@ -133,3 +137,110 @@ const addRoles = () => {
       mainPrompt();
     });
 };
+
+const addEmployees = () => {
+  inquirer
+    .prompt([
+      {
+        name: "first_name",
+        message: "Please enter the employee's first name.",
+        type: "input",
+      },
+      {
+        name: "last_name",
+        message: "Please enter the employee's last name.",
+        type: "input",
+      },
+      {
+        name: "role_id",
+        message: "Please enter the ID of the role of the employee",
+        type: "input",
+      },
+      {
+        name: "manager",
+        message: "Is this employee a manager?",
+        type: "list",
+        choices: ["yes", "no"],
+      },
+    ])
+    .then((res) => {
+      if (res.manager === "yes") {
+        delete res.manager;
+        db.query("INSERT INTO employees SET ?", res, (err) => {
+          if (err) {
+            console.log(err);
+          }
+        });
+        mainPrompt();
+      } else if (res.manager === "no") {
+        inquirer
+          .prompt([
+            {
+              name: "manager_id",
+              type: "input",
+              message: "Please enter the ID of the manager of the employee.",
+            },
+          ])
+          .then((subordinate) => {
+            delete res.manager;
+            let newEmployee = {
+              ...employee,
+              manager_id: subordinate.manager_id,
+            };
+
+            db.query("INSERT INTO employees SET ?", newEmployee, (err) => {
+              if (err) {
+                console.log(err);
+              }
+            });
+            mainPrompt();
+          });
+      }
+    });
+};
+
+const updateEmployeeRoles = () => {
+  inquirer
+    .prompt([
+      {
+        name: "id",
+        message:
+          "Please enter the ID of the employee you would like to update.",
+        type: "input",
+      },
+      {
+        name: "first_name",
+        message: "Please enter the updated first name of the employee.",
+        type: "input",
+      },
+      {
+        name: "last_name",
+        message: "Please enter the updated last name of the employee.",
+        type: "input",
+      },
+      {
+        name: "role_id",
+        message: "Please enter the updated role ID of the employee.",
+        type: "input",
+      },
+      {
+        name: "manager_id",
+        message:
+          "If the employee is a manager, please enter updated manager ID for the employee.",
+        type: "input",
+      },
+    ])
+    .then((res) => {
+      db.query(`UPDATE employees SET ? WHERE id =${res.id}`, res, (err) => {
+        console.log(err);
+      });
+      mainPrompt();
+    });
+};
+
+const quit = () => {
+  console.log("Goodbye!");
+  process.exit();
+};
+
+mainPrompt();
